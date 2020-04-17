@@ -143,8 +143,7 @@ function initToastr() {
 
 //Api call
 async function getMovieByQry(qry) {
-    var api_url = 'http://api.tvmaze.com/search/shows'
-
+    var api_url = `${window.location.protocol}//api.tvmaze.com/search/shows`
     response = await fetch(api_url + "?q=" + qry);
     data = await response.json();
     return data;
