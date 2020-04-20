@@ -17,7 +17,7 @@ var Data = {
         var db = firebase.firestore();
         return db;
     },
-    registerUser: function (user, ) {
+    registerUser: function (user) {
         var db = this.getDb();
         return db.collection("users").doc().set(user.toPlainObject());
     },
@@ -40,7 +40,3 @@ class User {
         };
     }
 }
-
-$(function () {
-    Data.init();
-});

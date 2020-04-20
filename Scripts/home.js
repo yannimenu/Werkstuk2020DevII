@@ -1,60 +1,44 @@
-$(function () {
-    addListeners();
-    initToastr();
-    loginUserProcess();
-});
+var Home = {
+    init: function () {
+        addListeners();
+        initToastr();
+        loginUserProcess();
+    }
+};
 
 function addListeners() {
     //Add listener for movie search
-    $('#btnSearchMovie').on('click', handleSearchMovie);
-    $('#registerToolTipLogin').on('click', handleRegisterFromLogin);
-    $('#submitRegister').on('click', handleUserRegister);
-    $('#submitLogin').on('click', handleUserLogin);
-    $('#submitLogout').on('click', handleUserLogout);
+    document.getElementById('btnSearchMovie').onclick = handleSearchMovie;
+    document.getElementById('registerToolTipLogin').onclick = handleRegisterFromLogin
+    document.getElementById('submitRegister').onclick = handleUserRegister
+    document.getElementById('submitLogin').onclick = handleUserLogin
+    document.getElementById('submitLogout').onclick = handleUserLogout
 }
 
 async function handleSearchMovie(event) {
     var movieQryVal = $('#movieQry').val();
     var res = await getMovieByQry(movieQryVal);
 
-    var resultString = '';
+    var append = '';
     res.forEach(show => {
-        var imageSrc = './Images/question.jpg';
-        var summary = 'No summary';
+        var imageSrc = (show.show.image?.medium != null) ? show.show.image?.medium : './Images/question.jpg';
+        var summary = (show.show.summary != null) ?  Helper.stripHtml(show.show.summary).substring(0, 200) : 'No summary';
         var summaryFull = '';
-
-        if (show.show.image?.medium != null) imageSrc = show.show.image?.medium;
-        if (show.show.summary != null) summary = stripHtml(show.show.summary).substring(0, 200);
+        var showName = show.show.name;
 
         if (show.show.summary?.length > 200) {
             summary = summary.substring(0, summary.lastIndexOf(' '));
             summary = summary + '...';
-            summaryFull = stripHtml(show.show.summary);
+            summaryFull = Helper.stripHtml(show.show.summary);
         };
 
-        resultString += '<div class="col-md-4">' +
-            '<div class="card mb-4 shadow-sm">' +
-            '<img class="card-img-top" src="' + imageSrc + '" alt="Card image cap">' +
-            '<div class="card-body">' +
-            '<h5 class="card-title">' + show.show.name + '</h5>' +
-            '<p class="card-text" data-toggle="tooltip" data-placement="bottom" title="' + summaryFull + '">' + summary + '</p>' +
-            '<div class="d-flex justify-content-between align-items-center">' +
-            '<div class="btn-group">' +
-            '<button type="button" class="btn btn-sm btn-outline-secondary">View</button>' +
-            '<button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>' +
-            '</div>' +
-            '<small class="text-muted">9 mins</small>' +
-            '</div>' +
-            '</div>' +
-            '</div>' +
-            '</div>';
+        append += Helper.fillApiResult(showName, imageSrc, summaryFull, summary);
     });
 
-    $('#showCardSection').html(resultString);
-
-    //update the tooltips with bootstrap
-    $('[data-toggle="tooltip"]').tooltip();
-    console.log('res', res);
+    document.getElementById('showCardSection').innerHTML = append;
+ 
+  
+     $('[data-toggle="tooltip"]').tooltip();
 }
 
 function handleRegisterFromLogin(event) {
@@ -64,8 +48,8 @@ function handleRegisterFromLogin(event) {
 }
 
 async function handleUserRegister() {
-    var username = $('#registerUserName').val();
-    var password = $('#registerPw').val();
+    var username = document.getElementById('registerUserName').value; 
+    var password = document.getElementById('registerPw').value;
     var user = new User(username, password);
 
     let dbResult = await Data.getUserByUserName(user.Username);
@@ -125,15 +109,16 @@ function loginUserProcess() {
     let user = JSON.parse(localStorage.getItem('authenticatedUser'));
 
     if (user == null) {
-        //Not logged in
-        $("#navbarNotLoggedIn").show();
-        $('#navbarLoggedIn').hide();
+        // Not logged in
+        document.getElementById("navbarNotLoggedIn").style.display = "block";
+        document.getElementById("navbarLoggedIn").style.display = "none";
+    
     }
     else {
         //Logged in
-        $("#navbarNotLoggedIn").hide();
-        $('#navbarLoggedIn').show();
-        $('#navbarLoggedInTitle').html(`Welkom ${user.Username}!`);
+        document.getElementById("navbarNotLoggedIn").style.display = "none";
+        document.getElementById("navbarLoggedIn").style.display = "block";
+        document.getElementById("navbarLoggedInTitle").innerHTML = `Welkom ${user.Username}!`;
     }
 }
 
@@ -143,7 +128,8 @@ function initToastr() {
 
 //Api call
 async function getMovieByQry(qry) {
-    var api_url = `${window.location.protocol}//api.tvmaze.com/search/shows`
+    var protocol = (window.location.protocol.indexOf("https") != -1) ? "https" : "http";
+    var api_url = `${protocol}://api.tvmaze.com/search/shows`
     response = await fetch(api_url + "?q=" + qry);
     data = await response.json();
     return data;
