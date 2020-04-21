@@ -6,39 +6,34 @@ var Home = {
     }
 };
 
+var apiResult;
+var selectedShow;
+
 function addListeners() {
     //Add listener for movie search
     document.getElementById('btnSearchMovie').onclick = handleSearchMovie;
-    document.getElementById('registerToolTipLogin').onclick = handleRegisterFromLogin
-    document.getElementById('submitRegister').onclick = handleUserRegister
-    document.getElementById('submitLogin').onclick = handleUserLogin
-    document.getElementById('submitLogout').onclick = handleUserLogout
+    document.getElementById('registerToolTipLogin').onclick = handleRegisterFromLogin;
+    document.getElementById('submitRegister').onclick = handleUserRegister;
+    document.getElementById('submitLogin').onclick = handleUserLogin;
+    document.getElementById('submitLogout').onclick = handleUserLogout;
+    document.getElementById('submitTvShow').onclick = handleSubmitTvShow;
 }
 
 async function handleSearchMovie(event) {
     var movieQryVal = $('#movieQry').val();
-    var res = await getMovieByQry(movieQryVal);
+    apiResult = await getMovieByQry(movieQryVal);
 
     var append = '';
-    res.forEach(show => {
-        var imageSrc = (show.show.image?.medium != null) ? show.show.image?.medium : './Images/question.jpg';
-        var summary = (show.show.summary != null) ?  Helper.stripHtml(show.show.summary).substring(0, 200) : 'No summary';
-        var summaryFull = '';
-        var showName = show.show.name;
+    var counter = 1;
 
-        if (show.show.summary?.length > 200) {
-            summary = summary.substring(0, summary.lastIndexOf(' '));
-            summary = summary + '...';
-            summaryFull = Helper.stripHtml(show.show.summary);
-        };
-
-        append += Helper.fillApiResult(showName, imageSrc, summaryFull, summary);
+    apiResult.forEach(show => {
+        append += Helper.apiElement(show, counter);
+        show.id = counter;
+        counter += 1;
     });
 
     document.getElementById('showCardSection').innerHTML = append;
- 
-  
-     $('[data-toggle="tooltip"]').tooltip();
+    $('[data-toggle="tooltip"]').tooltip();
 }
 
 function handleRegisterFromLogin(event) {
@@ -48,7 +43,7 @@ function handleRegisterFromLogin(event) {
 }
 
 async function handleUserRegister() {
-    var username = document.getElementById('registerUserName').value; 
+    var username = document.getElementById('registerUserName').value;
     var password = document.getElementById('registerPw').value;
     var user = new User(username, password);
 
@@ -99,10 +94,38 @@ async function handleUserLogin() {
     }
 }
 
+function handleAddShow(id) {
+    selectedShow = apiResult.find(x => x.id == id);
+    $('#tvShowPopUp').modal('toggle');
+    document.getElementById('titleTvShowPopUp').innerHTML = selectedShow.show.name;
+    document.querySelector("#tvShowPopUp .modal-body").innerHTML = Helper.tvAddElement(selectedShow);
+}
+
 function handleUserLogout() {
     Toastr.success('Successfully logged out.', 3000);
     localStorage.removeItem('authenticatedUser');
     loginUserProcess();
+}
+
+function handleSubmitTvShow(){
+    $('#tvShowPopUp').modal('toggle');
+    var userComment = document.getElementById('userComment').value;
+    selectedShow.userComment = userComment;
+    
+    selectedShow = null;
+}
+    
+function addComment(el, id){
+    el.remove();
+
+    var tableBody = document.getElementById("show-tbody");
+    tableBody.innerHTML =  tableBody.innerHTML +
+    `
+        <tr>
+            <td class="font-weight-bold">Note</td>
+            <td colspan="3"><input type="text" class="form-control"></td>
+        </tr>
+    `;
 }
 
 function loginUserProcess() {
@@ -112,7 +135,7 @@ function loginUserProcess() {
         // Not logged in
         document.getElementById("navbarNotLoggedIn").style.display = "block";
         document.getElementById("navbarLoggedIn").style.display = "none";
-    
+
     }
     else {
         //Logged in

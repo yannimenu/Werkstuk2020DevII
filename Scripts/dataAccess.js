@@ -24,6 +24,10 @@ var Data = {
     getUserByUserName: function (username) {
         var db = this.getDb();
         return db.collection("users").where("Username", "==", username).get();
+    },
+    saveUserFavorite: function (user, show) {
+        var db = this.getDb();
+        return db.collection("users").doc().set(user.toPlainObject());
     }
 };
 
