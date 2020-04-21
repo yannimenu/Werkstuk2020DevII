@@ -25,9 +25,24 @@ var Data = {
         var db = this.getDb();
         return db.collection("users").where("Username", "==", username).get();
     },
-    saveUserFavorite: function (user, show) {
+    saveUserFavorite: async function (user, show) {
         var db = this.getDb();
-        return db.collection("users").doc().set(user.toPlainObject());
+        var result = await this.getUserByUserName(user.Username);
+        var doc = result.docs[0];
+        var firestoreUser = doc.data();
+        var showsToPush = [];
+
+        if (Array.isArray(firestoreUser.favorites) && firestoreUser.favorites.length > 0) {
+            firestoreUser.favorites.push(show);
+            showsToPush = firestoreUser.favorites;
+        }
+        else {
+            showsToPush = [show];
+        }
+
+        return db.collection("users").doc(doc.id).update(
+            { "favorites": showsToPush }
+        );
     }
 };
 

@@ -8,6 +8,7 @@ var Home = {
 
 var apiResult;
 var selectedShow;
+var authenticatedUser;
 
 function addListeners() {
     //Add listener for movie search
@@ -71,9 +72,9 @@ async function handleUserRegister() {
 async function handleUserLogin() {
     var username = $('#loginUserName').val();
     var password = $('#loginPw').val();
-    var user = new User(username, password);
+    authenticatedUser = new User(username, password);
 
-    let dbResult = await Data.getUserByUserName(user.Username);
+    let dbResult = await Data.getUserByUserName(authenticatedUser.Username);
     let dbPw = undefined;
 
     if (!dbResult.empty) {
@@ -88,7 +89,7 @@ async function handleUserLogin() {
     }
     else {
         Toastr.success('Successfully logged in.', 3000);
-        localStorage.setItem('authenticatedUser', JSON.stringify(user));
+        localStorage.setItem('authenticatedUser', JSON.stringify(authenticatedUser));
         $('#loginPopUp').modal('toggle');
         loginUserProcess();
     }
@@ -107,31 +108,40 @@ function handleUserLogout() {
     loginUserProcess();
 }
 
-function handleSubmitTvShow(){
+function handleSubmitTvShow() {
+    var userComment = document.getElementById('userCommentInput')?.value;
     $('#tvShowPopUp').modal('toggle');
-    var userComment = document.getElementById('userComment').value;
-    selectedShow.userComment = userComment;
-    
+    if(userComment != null) selectedShow.userComment = userComment;
+
+    Data.saveUserFavorite(authenticatedUser, selectedShow)
+        .then(function (msg) {
+            Toastr.success('User has been added.', 3000);
+        })
+        .catch(function (error) {
+            Toastr.error(error, 3000);
+            console.error(error);            
+        });
+
     selectedShow = null;
 }
-    
-function addComment(el, id){
+
+function addComment(el, id) {
     el.remove();
 
     var tableBody = document.getElementById("show-tbody");
-    tableBody.innerHTML =  tableBody.innerHTML +
-    `
+    tableBody.innerHTML = tableBody.innerHTML +
+        `
         <tr>
             <td class="font-weight-bold">Note</td>
-            <td colspan="3"><input type="text" class="form-control"></td>
+            <td colspan="3"><input id='userCommentInput' type="text" class="form-control"></td>
         </tr>
     `;
 }
 
 function loginUserProcess() {
-    let user = JSON.parse(localStorage.getItem('authenticatedUser'));
+    authenticatedUser = JSON.parse(localStorage.getItem('authenticatedUser'));
 
-    if (user == null) {
+    if (authenticatedUser == null) {
         // Not logged in
         document.getElementById("navbarNotLoggedIn").style.display = "block";
         document.getElementById("navbarLoggedIn").style.display = "none";
@@ -141,7 +151,7 @@ function loginUserProcess() {
         //Logged in
         document.getElementById("navbarNotLoggedIn").style.display = "none";
         document.getElementById("navbarLoggedIn").style.display = "block";
-        document.getElementById("navbarLoggedInTitle").innerHTML = `Welkom ${user.Username}!`;
+        document.getElementById("navbarLoggedInTitle").innerHTML = `Welkom ${authenticatedUser.Username}!`;
     }
 }
 

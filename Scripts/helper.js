@@ -44,7 +44,6 @@ Helper = {
     },
     tvAddElement: function(show){
         var details = this.getShowDetails(show);
-        console.log(details);
         
         return `<div class="media">
         <img src="${details.src}" class="align-self-start mr-3" alt="...">
