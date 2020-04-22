@@ -62,7 +62,6 @@ async function handleUserRegister() {
                 $('#registerPopUp').modal('toggle');
                 Toastr.error('Something went wrong, please try again later.', 2000);
                 console.error(error);
-
             });
     }
     else {
@@ -165,13 +164,12 @@ function loginUserProcess() {
         // Not logged in
         document.getElementById("navbarNotLoggedIn").style.display = "block";
         document.getElementById("navbarLoggedIn").style.display = "none";
-
     }
     else {
         //Logged in
         document.getElementById("navbarNotLoggedIn").style.display = "none";
         document.getElementById("navbarLoggedIn").style.display = "block";
-        document.getElementById("navbarLoggedInTitle").innerHTML = `Welkom ${authenticatedUser.Username}!`;
+        document.getElementById("navbarLoggedInTitle").innerHTML = `Welcome ${authenticatedUser.Username}!`;
     }
 }
 
