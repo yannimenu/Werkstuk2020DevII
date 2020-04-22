@@ -11,13 +11,13 @@ var selectedShow;
 var authenticatedUser;
 
 function addListeners() {
-    //Add listener for movie search
     document.getElementById('btnSearchMovie').onclick = handleSearchMovie;
     document.getElementById('registerToolTipLogin').onclick = handleRegisterFromLogin;
     document.getElementById('submitRegister').onclick = handleUserRegister;
     document.getElementById('submitLogin').onclick = handleUserLogin;
     document.getElementById('submitLogout').onclick = handleUserLogout;
     document.getElementById('submitTvShow').onclick = handleSubmitTvShow;
+    document.getElementById('myFavorites').onclick = handleOpenMyFavorites;
 }
 
 async function handleSearchMovie(event) {
@@ -43,6 +43,7 @@ function handleRegisterFromLogin(event) {
     $('#registerPopUp').modal('toggle');
 }
 
+//HANDLERS
 async function handleUserRegister() {
     var username = document.getElementById('registerUserName').value;
     var password = document.getElementById('registerPw').value;
@@ -95,7 +96,7 @@ async function handleUserLogin() {
     }
 }
 
-function handleAddShow(id) {
+function handleOpenAddTvShow(id) {
     selectedShow = apiResult.find(x => x.id == id);
     $('#tvShowPopUp').modal('toggle');
     document.getElementById('titleTvShowPopUp').innerHTML = selectedShow.show.name;
@@ -111,21 +112,40 @@ function handleUserLogout() {
 function handleSubmitTvShow() {
     var userComment = document.getElementById('userCommentInput')?.value;
     $('#tvShowPopUp').modal('toggle');
-    if(userComment != null) selectedShow.userComment = userComment;
+    if (userComment != null) selectedShow.userComment = userComment;
 
     Data.saveUserFavorite(authenticatedUser, selectedShow)
         .then(function (msg) {
-            Toastr.success('User has been added.', 3000);
+            Toastr.success('Show has been added.', 3000);
         })
         .catch(function (error) {
             Toastr.error(error, 3000);
-            console.error(error);            
+            console.error(error);
         });
 
     selectedShow = null;
 }
 
-function addComment(el, id) {
+async function handleOpenMyFavorites() {
+    $("#favTvShowPopUp").modal('toggle');
+    document.querySelector("#favTvShowPopUp .modal-body").innerHTML = await Helper.favTvElement(authenticatedUser);
+}
+
+//OTHER
+function removeUserComment(username, showId) {
+    $("#favTvShowPopUp").modal('toggle');
+
+    Data.removeUserFavorite(username, showId)
+        .then(function (msg) {
+            Toastr.success('Show has been removed.', 3000);
+        })
+        .catch(function (error) {
+            Toastr.error(error, 3000);
+            console.error(error);
+        });
+}
+
+function addComment(el) {
     el.remove();
 
     var tableBody = document.getElementById("show-tbody");
@@ -159,7 +179,7 @@ function initToastr() {
     $('.toast').toast();
 }
 
-//Api call
+//API
 async function getMovieByQry(qry) {
     var protocol = (window.location.protocol.indexOf("https") != -1) ? "https" : "http";
     var api_url = `${protocol}://api.tvmaze.com/search/shows`

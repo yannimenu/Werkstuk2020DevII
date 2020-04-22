@@ -43,6 +43,18 @@ var Data = {
         return db.collection("users").doc(doc.id).update(
             { "favorites": showsToPush }
         );
+    },
+    removeUserFavorite: async function (username, showId) {
+        var db = this.getDb();
+        var result = await this.getUserByUserName(username);
+        var doc = result.docs[0];
+        var firestoreUser = doc.data();
+        var showsToPush = [];
+        showsToPush = firestoreUser.favorites.filter(x => x.id != showId);
+
+        db.collection("users").doc(doc.id).update(
+            { "favorites": showsToPush }
+        );
     }
 };
 

@@ -52,6 +52,7 @@
           <div id="navbarLoggedIn" class="col-sm-4 offset-md-1 py-4">
             <h4 id="navbarLoggedInTitle" class="text-white">Welkom </h4>
             <ul class="list-unstyled">
+              <li><a id="myFavorites" href="#" class="text-white">My favorites</a></li>
               <li><a id="submitLogout" href="#" class="text-white">Logout</a></li>
             </ul>
           </div>
@@ -158,6 +159,28 @@
       </div>
     </div>
     <!-- Modal AddTvShow -->
+
+    <!-- Modal MyFavTvShows -->
+    <div class="modal fade" id="favTvShowPopUp" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="titleFavTvShowPopUp">Favorites:</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+        
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal MyFavTvShows -->
 
     <div class="navbar navbar-dark bg-dark shadow-sm">
       <div class="container d-flex justify-content-between">
