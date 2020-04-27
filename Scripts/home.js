@@ -117,6 +117,7 @@ function handleOpenAddTvShow(id) {
 function handleUserLogout() {
     Toastr.success('Successfully logged out.', 3000);
     localStorage.removeItem('authenticatedUser');
+    authenticatedUser = null;
     loginUserProcess();
     removeApiResults();
 }
