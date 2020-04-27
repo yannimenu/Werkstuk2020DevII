@@ -50,7 +50,7 @@ var Data = {
         var doc = result.docs[0];
         var firestoreUser = doc.data();
         var showsToPush = [];
-        showsToPush = firestoreUser.favorites.filter(x => x.id != showId);
+        showsToPush = firestoreUser.favorites.filter(x => x.show.id != showId);
 
         db.collection("users").doc(doc.id).update(
             { "favorites": showsToPush }

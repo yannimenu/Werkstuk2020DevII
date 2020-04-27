@@ -20,6 +20,7 @@ function addListeners() {
     document.getElementById('myFavorites').onclick = handleOpenMyFavorites;
 }
 
+//HANDLERS
 async function handleSearchMovie(event) {
     var movieQryVal = $('#movieQry').val();
     apiResult = await getMovieByQry(movieQryVal);
@@ -28,7 +29,7 @@ async function handleSearchMovie(event) {
     var counter = 1;
 
     apiResult.forEach(show => {
-        append += Helper.apiElement(show, counter);
+        append += Helper.apiElement(show, counter, authenticatedUser);
         show.id = counter;
         counter += 1;
     });
@@ -43,7 +44,6 @@ function handleRegisterFromLogin(event) {
     $('#registerPopUp').modal('toggle');
 }
 
-//HANDLERS
 async function handleUserRegister() {
     var username = document.getElementById('registerUserName').value;
     var password = document.getElementById('registerPw').value;
@@ -93,6 +93,8 @@ async function handleUserLogin() {
         $('#loginPopUp').modal('toggle');
         loginUserProcess();
     }
+
+    removeApiResults();
 }
 
 function handleOpenAddTvShow(id) {
@@ -106,6 +108,7 @@ function handleUserLogout() {
     Toastr.success('Successfully logged out.', 3000);
     localStorage.removeItem('authenticatedUser');
     loginUserProcess();
+    removeApiResults();
 }
 
 function handleSubmitTvShow() {
@@ -130,6 +133,19 @@ async function handleOpenMyFavorites() {
     document.querySelector("#favTvShowPopUp .modal-body").innerHTML = await Helper.favTvElement(authenticatedUser);
 }
 
+function handleAddComment(el) {
+    el.remove();
+
+    var tableBody = document.getElementById("show-tbody");
+    tableBody.innerHTML = tableBody.innerHTML +
+        `
+        <tr>
+            <td class="font-weight-bold">Note</td>
+            <td colspan="3"><input id='userCommentInput' type="text" class="form-control"></td>
+        </tr>
+    `;
+}
+
 //OTHER
 function removeUserComment(username, showId) {
     $("#favTvShowPopUp").modal('toggle');
@@ -144,18 +160,7 @@ function removeUserComment(username, showId) {
         });
 }
 
-function addComment(el) {
-    el.remove();
 
-    var tableBody = document.getElementById("show-tbody");
-    tableBody.innerHTML = tableBody.innerHTML +
-        `
-        <tr>
-            <td class="font-weight-bold">Note</td>
-            <td colspan="3"><input id='userCommentInput' type="text" class="form-control"></td>
-        </tr>
-    `;
-}
 
 function loginUserProcess() {
     authenticatedUser = JSON.parse(localStorage.getItem('authenticatedUser'));
@@ -177,12 +182,18 @@ function initToastr() {
     $('.toast').toast();
 }
 
+function removeApiResults(){
+    document.getElementById('showCardSection').innerHTML = '';
+}
+
 //API
 async function getMovieByQry(qry) {
     var protocol = (window.location.protocol.indexOf("https") != -1) ? "https" : "http";
     var api_url = `${protocol}://api.tvmaze.com/search/shows`
     response = await fetch(api_url + "?q=" + qry);
-    data = await response.json();
+    data = await response.json();    
+    console.log(data);
+    
     return data;
 }
 

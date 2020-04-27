@@ -23,7 +23,7 @@ Helper = {
             src, summary, summaryFull, name
         };
     },
-    apiElement: function (show, id) {
+    apiElement: function (show, id, userLoggedIn) {
         var details = this.getShowDetails(show);
 
         return `<div class="col-md-4">
@@ -33,10 +33,13 @@ Helper = {
         <h5 class="card-title">${details.name}</h5>
         <p class="card-text" data-toggle="tooltip" data-placement="bottom" title="${details.summaryFull}">${details.summary}</p>
         <div class="d-flex justify-content-between align-items-center">
-        <div class="btn-group">
-        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="handleOpenAddTvShow(${id})">Favorite</button>
-        </div>
-        <small class="text-muted">9 mins</small>
+        ${
+            (userLoggedIn) ?
+                `<div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="handleOpenAddTvShow(${id})">Favorite</button>
+            </div>`
+                : ''
+            }
         </div>
         </div>
         </div>
@@ -54,44 +57,60 @@ Helper = {
                 <td class="font-weight-bold">Rating</td>
                 <td colspan="2">${show.show.rating.average}</td>
                 <td class="text-right">                  
-                    <button id="userComment" type="button" class="btn btn-sm btn-outline-secondary" onclick='addComment(this)'>Add note</button>                
+                 <button id="userComment" type="button" class="btn btn-sm btn-outline-secondary" onclick='handleAddComment(this)'>Add note</button>           
                 </td>
-            </tr>
-            <tr>
-                <td class="font-weight-bold">Premiered</td>
-                <td colspan="3">${show.show.premiered}</td>
-            </tr>
-            <tr>
-                <td class="font-weight-bold">Status</td>
-                <td colspan="3">${show.show.status}</td>
-            </tr>
-            <tr>
-                <td class="font-weight-bold">Summary</td>
-                <td colspan="3">${details.summaryFull}</td>
-            </tr>
-        </tbody>
-        </table>
-        </div>
-        </div>`;
+            </tr >
+    <tr>
+        <td class="font-weight-bold">Premiered</td>
+        <td colspan="3">${show.show.premiered}</td>
+    </tr>
+    <tr>
+        <td class="font-weight-bold">Status</td>
+        <td colspan="3">${show.show.status}</td>
+    </tr>
+    <tr>
+        <td class="font-weight-bold">Summary</td>
+        <td colspan="3">${details.summaryFull}</td>
+    </tr>
+        </tbody >
+        </table >
+        </div >
+        </div > `;
     },
     favTvElement: async function (user) {
-        var fireBaseUser = await Data.getUserByUserName(user.Username);
-        var favs = fireBaseUser.docs[0].data().favorites;
         var append = '';
+        var fireBaseUser = await Data.getUserByUserName(user.Username);
+        var favs = fireBaseUser.docs[0].data().favorites.sort((a, b) => {
+            var nameA = a.show.name.toUpperCase(); // ignore upper and lowercase
+            var nameB = b.show.name.toUpperCase(); // ignore upper and lowercase
+            if (nameA < nameB) {
+                return -1;
+            }
+            if (nameA > nameB) {
+                return 1;
+            }
+
+            return 0;
+        });
+
 
         favs.forEach(show => {
             var details = this.getShowDetails(show);
-            
-            append += `<div class="media" style="padding: 5px 0px 5px 0px;">
-                <img src="${details.src}" class="align-self-start mr-3" alt="...">
-                <div class="media-body">
-                <table class="table table-borderless">       
+
+            append += `<div class="media" style = "padding: 5px 0px 5px 0px;" >
+        <img src="${details.src}" class="align-self-start mr-3" alt="...">
+        <div class="media-body">
+            <table class="table table-borderless">
                 <tbody id="show-tbody">
-                    <tr>          
+                    <tr>
+                        <td class="font-weight-bold">Name</td>
+                        <td colspan="3">${show.show.name}</td>
+                    </tr>
+                    <tr>
                         <td class="font-weight-bold">Rating</td>
                         <td colspan="2">${show.show.rating.average}</td>
-                        <td class="text-right">                  
-                            <button onclick="removeUserComment('${user.Username}', ${show.id})" type="button" class="btn btn-sm btn-outline-secondary">Remove</button>                
+                        <td class="text-right">
+                            <button onclick="removeUserComment('${user.Username}', ${show.show.id})" type="button" class="btn btn-sm btn-outline-secondary">Remove</button>
                         </td>
                     </tr>
                     <tr>
@@ -111,8 +130,8 @@ Helper = {
                         <td colspan="3">${(show.userComment == null) ? 'No comment' : show.userComment}</td>
                     </tr>
                 </tbody>
-                </table>
-                </div>
+            </table>
+        </div>
                 </div>`;
         });
         return append;
