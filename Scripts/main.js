@@ -3,6 +3,7 @@
 // - https://www.w3schools.com/bootstrap/bootstrap_ref_js_tooltip.asp
 // - https://www.w3schools.com/bootstrap/bootstrap_modal.asp
 
+//Listen for the onload event and add scripts according to the loaded page
 window.onload = function () {
     loadScript("helper.js");
 
@@ -18,6 +19,7 @@ window.onload = function () {
     }
 };
 
+// Function to load other scripts into the current html page
 // https://stackoverflow.com/a/950146
 function loadScript(url, callback) {
     // Adding the script tag to the head as suggested before

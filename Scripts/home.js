@@ -1,3 +1,5 @@
+//Home Object, in order to be able to call the initialization functions 
+//from the other scripts that include it
 var Home = {
     init: function () {
         addListeners();
@@ -6,12 +8,14 @@ var Home = {
     }
 };
 
+//VARIABLES
 var apiResult;
 var selectedShow;
 var authenticatedUser;
 
+//This is a function that adds all the handler functions to the required HTML-Elements
 function addListeners() {
-    document.getElementById('btnSearchMovie').onclick = handleSearchMovie;
+    document.getElementById('btnSearchMovie').onclick = handleSearchShow;
     document.getElementById('registerToolTipLogin').onclick = handleRegisterFromLogin;
     document.getElementById('submitRegister').onclick = handleUserRegister;
     document.getElementById('submitLogin').onclick = handleUserLogin;
@@ -21,7 +25,8 @@ function addListeners() {
 }
 
 //HANDLERS
-async function handleSearchMovie(event) {
+//This function handles the request for a showSearch (data request @ api & appending it on the page)
+async function handleSearchShow(event) {
     var movieQryVal = $('#movieQry').val();
     apiResult = await getMovieByQry(movieQryVal);
 
@@ -29,7 +34,7 @@ async function handleSearchMovie(event) {
     var counter = 1;
 
     apiResult.forEach(show => {
-        append += Helper.apiElement(show, counter, authenticatedUser);
+        append += Helper.apiTvElement(show, counter, authenticatedUser);
         show.id = counter;
         counter += 1;
     });
@@ -38,12 +43,14 @@ async function handleSearchMovie(event) {
     $('[data-toggle="tooltip"]').tooltip();
 }
 
+//This function redirects users from the register popup to the login popup
 function handleRegisterFromLogin(event) {
     event.preventDefault();
     $('#loginPopUp').modal('toggle');
     $('#registerPopUp').modal('toggle');
 }
 
+//This function handels the registration of users
 async function handleUserRegister() {
     var username = document.getElementById('registerUserName').value;
     var password = document.getElementById('registerPw').value;
@@ -69,6 +76,7 @@ async function handleUserRegister() {
     }
 }
 
+// This function handels the login of users
 async function handleUserLogin() {
     var username = $('#loginUserName').val();
     var password = $('#loginPw').val();
@@ -97,13 +105,15 @@ async function handleUserLogin() {
     removeApiResults();
 }
 
+// This function handels the opening of the AddTvShow-Popup
 function handleOpenAddTvShow(id) {
     selectedShow = apiResult.find(x => x.id == id);
     $('#tvShowPopUp').modal('toggle');
     document.getElementById('titleTvShowPopUp').innerHTML = selectedShow.show.name;
-    document.querySelector("#tvShowPopUp .modal-body").innerHTML = Helper.tvAddElement(selectedShow);
+    document.querySelector("#tvShowPopUp .modal-body").innerHTML = Helper.addTvFavPopUpElement(selectedShow);
 }
 
+// This function handels the logout of users
 function handleUserLogout() {
     Toastr.success('Successfully logged out.', 3000);
     localStorage.removeItem('authenticatedUser');
@@ -111,6 +121,7 @@ function handleUserLogout() {
     removeApiResults();
 }
 
+// This function handels the submission of a new user-showfavorite
 function handleSubmitTvShow() {
     var userComment = document.getElementById('userCommentInput')?.value;
     $('#tvShowPopUp').modal('toggle');
@@ -128,11 +139,13 @@ function handleSubmitTvShow() {
     selectedShow = null;
 }
 
+// This function handels the opening of the favorite popup
 async function handleOpenMyFavorites() {
     $("#favTvShowPopUp").modal('toggle');
-    document.querySelector("#favTvShowPopUp .modal-body").innerHTML = await Helper.favTvElement(authenticatedUser);
+    document.querySelector("#favTvShowPopUp .modal-body").innerHTML = await Helper.myTvFavPopUpElement(authenticatedUser);
 }
 
+// This function handels the addition of a comment to a favorite
 function handleAddComment(el) {
     el.remove();
 
@@ -146,8 +159,8 @@ function handleAddComment(el) {
     `;
 }
 
-//OTHER
-function removeUserComment(username, showId) {
+// This function handels the removal of a user's favorite
+function handleRemoveUserFavorite(username, showId) {
     $("#favTvShowPopUp").modal('toggle');
 
     Data.removeUserFavorite(username, showId)
@@ -160,8 +173,8 @@ function removeUserComment(username, showId) {
         });
 }
 
-
-
+//GENERAL FUNCTIONS
+//This function checks if the user is logged in and displays the correct top banner accordingly
 function loginUserProcess() {
     authenticatedUser = JSON.parse(localStorage.getItem('authenticatedUser'));
 
@@ -178,15 +191,18 @@ function loginUserProcess() {
     }
 }
 
+//This function initializes the bootstrap toastr elements
 function initToastr() {
     $('.toast').toast();
 }
 
+// This function removes the api results shown beneath the searchbar
 function removeApiResults(){
     document.getElementById('showCardSection').innerHTML = '';
 }
 
 //API
+// This function queries the tvMazeApi
 async function getMovieByQry(qry) {
     var protocol = (window.location.protocol.indexOf("https") != -1) ? "https" : "http";
     var api_url = `${protocol}://api.tvmaze.com/search/shows`

@@ -1,12 +1,13 @@
-// HELPER FUNCTIONS
-//https://stackoverflow.com/a/822486
-
+//Helper Object, in order to be able to call functions from the other scripts that use it
 Helper = {
+    //https://stackoverflow.com/a/822486
+    //A function to clear all the html elements from a string
     stripHtml: function (html) {
         var tmp = document.createElement("DIV");
         tmp.innerHTML = html;
         return tmp.textContent || tmp.innerText || "";
     },
+    //This is a general function to get certain properties from a show object
     getShowDetails: function (show) {
         var src = (show.show.image?.medium != null) ? show.show.image?.medium : './Images/question.jpg';
         var summary = (show.show.summary != null) ? Helper.stripHtml(show.show.summary).substring(0, 200) : 'No summary';
@@ -23,7 +24,8 @@ Helper = {
             src, summary, summaryFull, name
         };
     },
-    apiElement: function (show, id, userLoggedIn) {
+    //This is a function that generates HTML for the Api result returned by tvMazeApi 
+    apiTvElement: function (show, id, userLoggedIn) {
         var details = this.getShowDetails(show);
 
         return `<div class="col-md-4">
@@ -45,7 +47,8 @@ Helper = {
         </div>
         </div>`;
     },
-    tvAddElement: function (show) {
+    //This is a function that generates HTML for the Add-TVShow-favorite popup
+    addTvFavPopUpElement: function (show) {
         var details = this.getShowDetails(show);
 
         return `<div class="media">
@@ -77,7 +80,8 @@ Helper = {
         </div >
         </div > `;
     },
-    favTvElement: async function (user) {
+    //This is a function that generates HTML for the My-TVShow-favorite popup
+    myTvFavPopUpElement: async function (user) {
         var append = '';
         var fireBaseUser = await Data.getUserByUserName(user.Username);
         var favs = fireBaseUser.docs[0].data().favorites.sort((a, b) => {
@@ -110,7 +114,7 @@ Helper = {
                         <td class="font-weight-bold">Rating</td>
                         <td colspan="2">${show.show.rating.average}</td>
                         <td class="text-right">
-                            <button onclick="removeUserComment('${user.Username}', ${show.show.id})" type="button" class="btn btn-sm btn-outline-secondary">Remove</button>
+                            <button onclick="handleRemoveUserFavorite('${user.Username}', ${show.show.id})" type="button" class="btn btn-sm btn-outline-secondary">Remove</button>
                         </td>
                     </tr>
                     <tr>
@@ -138,7 +142,9 @@ Helper = {
     }
 };
 
+//Toastr Object, in order to be able to call functions from the other scripts that use it
 Toastr = {
+    //Shows a success toastr
     success: function (text, hideTimeout) {
         document.querySelector("#toastElement img").setAttribute("src", "./Images/checkmark.png");
         document.querySelector("#toastElement .toast-title").innerHTML = "Success"
@@ -152,6 +158,7 @@ Toastr = {
             }, hideTimeout);
         }
     },
+    //Shows an error toastr
     error: function (text, hideTimeout) {
         document.querySelector("#toastElement img").setAttribute("src", "./Images/error.png");
         document.querySelector("#toastElement .toast-title").innerHTML = "Error"
